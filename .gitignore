@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Compilados
+bin/
+obj/
+
+# Archivos de bases de datos temporales (por el error que viste)
+*.db
+*.db-shm
+*.db-wal
+
+# Otros
+*.log
