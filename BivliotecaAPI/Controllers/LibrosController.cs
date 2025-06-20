@@ -20,7 +20,6 @@ namespace BivliotecaAPI.Controllers
         {
             this.context = context;
             this.mapper = mapper;
-            //prueba de git 
         }
         [HttpGet]
         public async Task<IEnumerable<LibroDTO>> Get()
