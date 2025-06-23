@@ -29,16 +29,19 @@ namespace BivliotecaAPI.Controllers
             return librosDTO;
         }
         [HttpGet("{id:int}",Name = "ObtenerLibros")] //api/libros/id
-        public async Task<ActionResult<LibroConAutorDTO>> Get(int id)
+        public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
         {
-            var libro = await context.Libros.Include(x => x.Autores).FirstOrDefaultAsync(x => x.Id == id);
+            var libro = await context.Libros
+                .Include(x => x.Autores)
+                .ThenInclude(x => x.Autor)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (libro is null)
             {
 
                 return NotFound();
 
             }
-            var libroDTO = mapper.Map<LibroConAutorDTO>(libro);
+            var libroDTO = mapper.Map<LibroConAutoresDTO>(libro);
 
             return libroDTO;
         }
