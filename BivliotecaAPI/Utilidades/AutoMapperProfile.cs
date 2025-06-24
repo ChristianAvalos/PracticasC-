@@ -30,6 +30,7 @@ namespace BivliotecaAPI.Utilidades
             CreateMap<LibroCreacionDTO, Libro>()
                 .ForMember(ent => ent.Autores, config => config.MapFrom(dto => dto.AutoresIds.Select(id => new AutorLibro { AutorId = id })));
 
+            CreateMap<Libro, LibroConAutoresDTO>();
 
             CreateMap<AutorLibro, AutorDTO>()
                 .ForMember(dto => dto.Id, config => config.MapFrom(ent => ent.AutorId))
