@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace BivliotecaAPI.Controllers
 {
@@ -7,15 +8,36 @@ namespace BivliotecaAPI.Controllers
     public class ConfiguracionesController : ControllerBase
     {
         private readonly IConfiguration configuration;
+
+        public PagosProcesamiento pagosProcesamiento { get; }
+
         private readonly IConfigurationSection seccion_01;
         private IConfigurationSection seccion_02;
+        private readonly PersonaOpciones _opcionesPersona;
 
-        public ConfiguracionesController(IConfiguration configuration)
+        public ConfiguracionesController(IConfiguration configuration, 
+            IOptionsSnapshot<PersonaOpciones> opcionesPersona, PagosProcesamiento pagosProcesamiento)
         {
             this.configuration = configuration;
+            this.pagosProcesamiento = pagosProcesamiento;
             seccion_01 = configuration.GetSection("seccion_1");
             seccion_02 = configuration.GetSection("seccion_2");
+            _opcionesPersona = opcionesPersona.Value;
         }
+        [HttpGet("opcions-monitor")]
+        public ActionResult GetTarifas()
+        {
+            var tarifa = pagosProcesamiento.ObtenerTarifa();
+            return Ok(tarifa);
+        }
+
+        [HttpGet("seccion_1_opciones")]
+        public ActionResult<PersonaOpciones> GetSeccion1Opciones()
+        {
+            return Ok(_opcionesPersona);
+        }
+
+
         [HttpGet("obtenertodos")]
         public ActionResult  GetObtenerTodos()
         {
@@ -58,6 +80,13 @@ namespace BivliotecaAPI.Controllers
             var opcion1 = configuration["ConnectionStrings:DefaultConnection"];
             
             return Ok(opcion1);
+        }
+
+        [HttpGet("proveedores")]
+        public ActionResult<string> GetProveedores()
+        {
+            var valor = configuration.GetValue<string>("quien_soy");
+            return Ok(new { valor });
         }
 
     }
