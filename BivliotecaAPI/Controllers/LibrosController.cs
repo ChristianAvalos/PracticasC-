@@ -6,11 +6,13 @@ using BivliotecaAPI.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/libros")]
+    [Authorize]
     public class LibrosController:ControllerBase
     {
         private readonly ApplicationDbContext context;

@@ -3,6 +3,7 @@ using Azure;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/autores")]
+    [Authorize]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -22,6 +24,7 @@ namespace BivliotecaAPI.Controllers
             this.mapper = mapper;
         }
         [HttpGet]
+        [AllowAnonymous] //Permite el acceso sin autenticación
         public async Task<IEnumerable<AutorDTO>> Get()
         {
 

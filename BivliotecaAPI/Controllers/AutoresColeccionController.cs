@@ -2,12 +2,14 @@
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/autores-coleccion")]
+    [Authorize]
     public class AutoresColeccionController: ControllerBase
     {
         private readonly ApplicationDbContext context;

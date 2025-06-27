@@ -2,6 +2,7 @@
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,8 @@ namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/libros/{libroId:int}/comentarios")]
+    [Authorize]
+
     public class ComentartiosController: ControllerBase
     {
         private readonly ApplicationDbContext context;
