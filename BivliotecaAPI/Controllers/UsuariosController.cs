@@ -1,4 +1,5 @@
 ﻿using BivliotecaAPI.DTOs;
+using BivliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +18,16 @@ namespace BivliotecaAPI.Controllers
         private readonly UserManager<IdentityUser> userManager;
         private readonly IConfiguration configuration;
         private readonly SignInManager<IdentityUser> signInManager;
+        private readonly IServicioUsuarios servicioUsuarios;
 
         public UsuariosController(UserManager<IdentityUser> userManager,IConfiguration configuration,
-                SignInManager<IdentityUser> signInManager
+                SignInManager<IdentityUser> signInManager,IServicioUsuarios servicioUsuarios
             )
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
+            this.servicioUsuarios = servicioUsuarios;
         }
         [HttpPost("registro")]
         [AllowAnonymous]
@@ -77,6 +80,21 @@ namespace BivliotecaAPI.Controllers
         {
             ModelState.AddModelError(string.Empty, "Login incorrectos");
             return ValidationProblem();
+        }
+        [HttpGet("renovar-token")]
+        public async Task<ActionResult<RespuestaAutenticacionDTO>> RenovarToken()
+        {
+            var usuario = await servicioUsuarios.ObtenerUsuario();
+            if (usuario is null)
+            {
+                return Unauthorized();
+            }
+
+            var credencialesUsuarioDTO = new CredencialesUsuarioDTO
+            {
+                Email = usuario.Email!
+            };
+            return Ok(await ConstruirToken(credencialesUsuarioDTO));
         }
 
         private async Task<RespuestaAutenticacionDTO> ConstruirToken(CredencialesUsuarioDTO credencialesUsuarioDTO)

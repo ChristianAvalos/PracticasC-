@@ -158,6 +158,7 @@ namespace BivliotecaAPI.Controllers
             }
             context.Remove(comnentarioDB);
 
+            await context.SaveChangesAsync();
 
 
             return NoContent();
