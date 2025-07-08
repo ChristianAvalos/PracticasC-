@@ -2,6 +2,7 @@
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
+using BivliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,14 @@ namespace BivliotecaAPI.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
-        public ComentartiosController(ApplicationDbContext context, IMapper mapper) {
+        private readonly IServicioUsuarios serviciosUsuarios;
+
+        public ComentartiosController(ApplicationDbContext context, IMapper mapper,
+            IServicioUsuarios serviciosUsuarios) {
 
             this.context = context;
             this.mapper = mapper;
-
+            this.serviciosUsuarios = serviciosUsuarios;
         }
         [HttpGet]
         public async Task<ActionResult<List<ComentarioDTO>>> get(int libroId)
@@ -32,6 +36,8 @@ namespace BivliotecaAPI.Controllers
                 return NotFound();
 
             }
+
+
             var comentarios = await context.Comentarios
                 .Include(x => x.Usuario)
                 .Where(x => x.LibroId == libroId)
@@ -63,9 +69,15 @@ namespace BivliotecaAPI.Controllers
                 return NotFound();
 
             }
+            var usuario = await serviciosUsuarios.ObtenerUsuario();
+            if (usuario is null)
+            {
+                return NotFound();
+            }
             var comentario = mapper.Map<Comentario>(comentarioCreacionDTO);
             comentario.LibroId = libroId;
             comentario.FechaPublicacion = DateTime.UtcNow;
+            comentario.UsuarioId = usuario.Id;
             context.Add(comentario);
             await context.SaveChangesAsync();
 
@@ -87,12 +99,24 @@ namespace BivliotecaAPI.Controllers
                 return NotFound();
 
             }
+            var usuario = await serviciosUsuarios.ObtenerUsuario();
+            if (usuario is null)
+            {
+                return NotFound();
+            }
 
             var comnentarioDB = await context.Comentarios.FirstOrDefaultAsync(x => x.Id == id);
             if (comnentarioDB is null)
             {
                 return BadRequest();
             }
+
+            if (comnentarioDB.UsuarioId != usuario.Id)
+            {
+                return Forbid();
+            }
+
+
             var comentarioPatchDTO = mapper.Map<ComentarioPatchDTO>(comnentarioDB);
             patchDoc.ApplyTo(comentarioPatchDTO, ModelState);
 
@@ -117,11 +141,25 @@ namespace BivliotecaAPI.Controllers
                 return NotFound();
 
             }
-            var registrosBorrados = await context.Comentarios.Where(x => x.Id == id).ExecuteDeleteAsync();
-            if (registrosBorrados == 0)
+            var usuario = await serviciosUsuarios.ObtenerUsuario();
+            if (usuario is null)
             {
                 return NotFound();
             }
+
+            var comnentarioDB = await context.Comentarios.FirstOrDefaultAsync(x => x.Id == id);
+            if (comnentarioDB is null)
+            {
+                return NotFound();
+            }
+            if (comnentarioDB.UsuarioId != usuario.Id)
+            {
+                return Forbid();
+            }
+            context.Remove(comnentarioDB);
+
+
+
             return NoContent();
         }
 

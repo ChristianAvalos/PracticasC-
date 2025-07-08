@@ -15,11 +15,12 @@ namespace BivliotecaAPI.Servicios
         }
             public async Task<IdentityUser?> ObtenerUsuario()
             {
-                var email = contextAccessor.HttpContext?.User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-                if (email == null)
+                var emailClaim = contextAccessor.HttpContext!.User.Claims.Where(x => x.Type == "email").FirstOrDefault();
+                if (emailClaim == null)
                 {
                     throw new Exception("El usuario no está autenticado");
                 }
+                var email = emailClaim.Value;
                 var usuario = await userManager.FindByEmailAsync(email);
 
                 if (usuario == null)
