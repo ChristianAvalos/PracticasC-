@@ -9,7 +9,7 @@ namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/autores-coleccion")]
-    [Authorize]
+    [Authorize(Policy = "EsAdmin")]
     public class AutoresColeccionController: ControllerBase
     {
         private readonly ApplicationDbContext context;

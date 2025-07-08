@@ -12,7 +12,7 @@ namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/usuarios")]
-    [Authorize]
+    
     public class UsuariosController: ControllerBase
     {
         private readonly UserManager<IdentityUser> userManager;
@@ -30,7 +30,7 @@ namespace BivliotecaAPI.Controllers
             this.servicioUsuarios = servicioUsuarios;
         }
         [HttpPost("registro")]
-        [AllowAnonymous]
+        
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Registrar(
             CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
@@ -55,7 +55,6 @@ namespace BivliotecaAPI.Controllers
             }
         }
         [HttpPost("login")]
-        [AllowAnonymous]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Login(
             CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
@@ -82,6 +81,7 @@ namespace BivliotecaAPI.Controllers
             return ValidationProblem();
         }
         [HttpGet("renovar-token")]
+        [Authorize]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> RenovarToken()
         {
             var usuario = await servicioUsuarios.ObtenerUsuario();
@@ -95,6 +95,45 @@ namespace BivliotecaAPI.Controllers
                 Email = usuario.Email!
             };
             return Ok(await ConstruirToken(credencialesUsuarioDTO));
+        }
+        [HttpPost("hacer-admin")]
+        [Authorize(Policy = "EsAdmin")]
+        public async Task<ActionResult> HacerAdmin(EditarClaimDTO editarClaimDTO)
+        {
+            var usuario = await userManager.FindByEmailAsync(editarClaimDTO.Email!);
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+            var resultado = await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "true"));
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(resultado.Errors);
+            }
+        }
+
+        [HttpPost("remover-admin")]
+        [Authorize(Policy = "EsAdmin")]
+        public async Task<ActionResult> RemoverAdmin(EditarClaimDTO editarClaimDTO)
+        {
+            var usuario = await userManager.FindByEmailAsync(editarClaimDTO.Email);
+            if (usuario is null)
+            {
+                return NotFound();
+            }
+            var resultado = await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "true"));
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(resultado.Errors);
+            }
         }
 
         private async Task<RespuestaAutenticacionDTO> ConstruirToken(CredencialesUsuarioDTO credencialesUsuarioDTO)

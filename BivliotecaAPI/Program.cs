@@ -39,6 +39,13 @@ builder.Services.AddAuthentication().AddJwtBearer(opciones
 }
 );
 
+builder.Services.AddAuthorization(opciones =>
+{
+    opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin", "true"));
+    opciones.AddPolicy("EsLector", politica => politica.RequireClaim("esLector", "true"));
+    opciones.AddPolicy("EsAutor", politica => politica.RequireClaim("esAutor", "true"));
+});
+
 var app = builder.Build();
 //area de middlewares
 

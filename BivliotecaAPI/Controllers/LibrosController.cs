@@ -12,7 +12,7 @@ namespace BivliotecaAPI.Controllers
 {
     [ApiController]
     [Route("api/libros")]
-    [Authorize]
+    [Authorize(Policy = "EsAdmin")]
     public class LibrosController:ControllerBase
     {
         private readonly ApplicationDbContext context;
