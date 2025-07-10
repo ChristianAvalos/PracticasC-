@@ -11,6 +11,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //area de servicios 
+builder.Services.AddDataProtection();
+
 var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
 builder.Services.AddCors(opciones =>
 {
@@ -19,7 +21,8 @@ builder.Services.AddCors(opciones =>
         {
             politica.WithOrigins(origenesPermitidos)
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowAnyHeader()
+                    .WithExposedHeaders("mi-cabecera");
         });
 });
 builder.Services.AddAutoMapper(typeof(Program));
@@ -60,6 +63,12 @@ builder.Services.AddAuthorization(opciones =>
 
 var app = builder.Build();
 //area de middlewares
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("mi-cabecera", "valor");
+    await next();
+});
+
 app.UseCors();
 
 app.MapControllers();   
