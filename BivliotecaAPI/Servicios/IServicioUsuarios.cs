@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BivliotecaAPI.Entidades;
+using Microsoft.AspNetCore.Identity;
 
 namespace BivliotecaAPI.Servicios
 {
     public interface IServicioUsuarios
     {
-        Task<IdentityUser?> ObtenerUsuario();
+        Task<Usuario?> ObtenerUsuario();
     }
 }

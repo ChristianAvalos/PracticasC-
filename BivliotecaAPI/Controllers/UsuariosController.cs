@@ -1,4 +1,5 @@
 ﻿using BivliotecaAPI.DTOs;
+using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,13 +16,13 @@ namespace BivliotecaAPI.Controllers
     
     public class UsuariosController: ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<Usuario> userManager;
         private readonly IConfiguration configuration;
-        private readonly SignInManager<IdentityUser> signInManager;
+        private readonly SignInManager<Usuario> signInManager;
         private readonly IServicioUsuarios servicioUsuarios;
 
-        public UsuariosController(UserManager<IdentityUser> userManager,IConfiguration configuration,
-                SignInManager<IdentityUser> signInManager,IServicioUsuarios servicioUsuarios
+        public UsuariosController(UserManager<Usuario> userManager,IConfiguration configuration,
+                SignInManager<Usuario> signInManager,IServicioUsuarios servicioUsuarios
             )
         {
             this.userManager = userManager;
@@ -34,7 +35,7 @@ namespace BivliotecaAPI.Controllers
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Registrar(
             CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
-            var usuario = new IdentityUser 
+            var usuario = new Usuario
             { 
                 UserName = credencialesUsuarioDTO.Email, 
                 Email = credencialesUsuarioDTO.Email
@@ -80,6 +81,27 @@ namespace BivliotecaAPI.Controllers
             ModelState.AddModelError(string.Empty, "Login incorrectos");
             return ValidationProblem();
         }
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult> Put(ActualizarUsuarioDTO actualizarUsuarioDTO)
+        {
+            var usuario = await servicioUsuarios.ObtenerUsuario();
+            if (usuario is null)
+            {
+                return Unauthorized();
+            }
+            usuario.FechaNacimiento = actualizarUsuarioDTO.FechaNacimiento;
+            var resultado = await userManager.UpdateAsync(usuario);
+            if (resultado.Succeeded)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return BadRequest(resultado.Errors);
+            }
+        }
+
         [HttpGet("renovar-token")]
         [Authorize]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> RenovarToken()
