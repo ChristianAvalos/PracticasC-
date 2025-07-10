@@ -1,9 +1,12 @@
-﻿using BivliotecaAPI.DTOs;
+﻿using AutoMapper;
+using BivliotecaAPI.Datos;
+using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,16 +23,30 @@ namespace BivliotecaAPI.Controllers
         private readonly IConfiguration configuration;
         private readonly SignInManager<Usuario> signInManager;
         private readonly IServicioUsuarios servicioUsuarios;
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
 
         public UsuariosController(UserManager<Usuario> userManager,IConfiguration configuration,
-                SignInManager<Usuario> signInManager,IServicioUsuarios servicioUsuarios
+                SignInManager<Usuario> signInManager,IServicioUsuarios servicioUsuarios,
+                ApplicationDbContext context,IMapper mapper
             )
         {
             this.userManager = userManager;
             this.configuration = configuration;
             this.signInManager = signInManager;
             this.servicioUsuarios = servicioUsuarios;
+            this.context = context;
+            this.mapper = mapper;
         }
+        [HttpGet]
+        [Authorize(Policy ="esAdmin")]
+        public async Task<IEnumerable<UsuarioDTO>> Get()
+        {
+            var usuarios = await context.Users.ToListAsync();
+            var usuariosDTO = mapper.Map<List<UsuarioDTO>>(usuarios);
+            return usuariosDTO;
+        }
+
         [HttpPost("registro")]
         
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Registrar(

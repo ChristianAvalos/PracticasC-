@@ -11,6 +11,17 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //area de servicios 
+var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
+builder.Services.AddCors(opciones =>
+{
+    opciones.AddDefaultPolicy(
+        politica =>
+        {
+            politica.WithOrigins(origenesPermitidos)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+        });
+});
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddControllers().AddNewtonsoftJson();
 
@@ -49,7 +60,7 @@ builder.Services.AddAuthorization(opciones =>
 
 var app = builder.Build();
 //area de middlewares
-
+app.UseCors();
 
 app.MapControllers();   
 
