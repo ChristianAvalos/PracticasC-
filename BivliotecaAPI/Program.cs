@@ -67,7 +67,18 @@ builder.Services.AddSwaggerGen(opciones =>
     {
         Title = "Biblioteca API",
         Version = "v1",
-        Description = "API para gestionar una biblioteca"
+        Description = "API para gestionar una biblioteca",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Email = "christiand.avalos.e@gmail.com",
+            Name = "Christian Avalos",
+            Url = new Uri("https://christianavalos.com")
+        },
+        License = new Microsoft.OpenApi.Models.OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/license/mit/")
+        }
     });
 });
 
