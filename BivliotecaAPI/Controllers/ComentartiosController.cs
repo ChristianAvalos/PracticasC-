@@ -28,6 +28,7 @@ namespace BivliotecaAPI.Controllers
             this.serviciosUsuarios = serviciosUsuarios;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<ComentarioDTO>>> get(int libroId)
         {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
@@ -47,6 +48,7 @@ namespace BivliotecaAPI.Controllers
             return mapper.Map<List<ComentarioDTO>>(comentarios);
         }
         [HttpGet("{id}", Name = "ObtenerComentario")]
+        [AllowAnonymous]
         public async Task<ActionResult<ComentarioDTO>> get(Guid id)
         {
             var comentario = await context.Comentarios

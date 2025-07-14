@@ -63,11 +63,7 @@ builder.Services.AddAuthorization(opciones =>
 
 var app = builder.Build();
 //area de middlewares
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("mi-cabecera", "valor");
-    await next();
-});
+
 
 app.UseCors();
 
