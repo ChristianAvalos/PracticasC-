@@ -61,7 +61,15 @@ builder.Services.AddAuthorization(opciones =>
     opciones.AddPolicy("EsAutor", politica => politica.RequireClaim("esAutor", "true"));
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opciones =>
+{
+    opciones.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Biblioteca API",
+        Version = "v1",
+        Description = "API para gestionar una biblioteca"
+    });
+});
 
 var app = builder.Build();
 //area de middlewares
