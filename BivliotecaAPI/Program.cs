@@ -61,8 +61,12 @@ builder.Services.AddAuthorization(opciones =>
     opciones.AddPolicy("EsAutor", politica => politica.RequireClaim("esAutor", "true"));
 });
 
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 //area de middlewares
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.UseCors();

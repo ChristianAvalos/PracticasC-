@@ -86,7 +86,7 @@ namespace BivliotecaAPI.Controllers
             var libroDTO = mapper.Map<LibroDTO>(libro);
             return CreatedAtRoute("ObtenerLibros", new { id = libro.Id }, libroDTO);
         }
-        public void AsignarOrdenAutores(Libro libro)
+        private void AsignarOrdenAutores(Libro libro)
         {
             if (libro.Autores is not null)
             {
