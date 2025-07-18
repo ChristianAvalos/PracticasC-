@@ -3,10 +3,12 @@ using Azure;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
+using BivliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace BivliotecaAPI.Controllers
 {
@@ -25,17 +27,23 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet]
         [AllowAnonymous] //Permite el acceso sin autenticación
-        public async Task<IEnumerable<AutorDTO>> Get()
+        public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
 
-            var autores =  await context.Autores.ToListAsync();
+            var queryable =  context.Autores.AsQueryable();
+            await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
+            var autores = await queryable.OrderBy(x => x.Nombres).Paginar(paginacionDTO).ToListAsync();
             var autoresDTO = mapper.Map<IEnumerable<AutorDTO>>(autores);
             return autoresDTO;
         }
 
         [HttpGet("{id:int}",Name ="ObtenerAutor")] //api/autores/id
         [AllowAnonymous]
-        public async Task<ActionResult<AutorConLibrosDTO>> Get(int id)
+        [EndpointSummary("Obtiene autor por ID")]
+        [EndpointDescription("Obtiene un autor específico junto con sus libros asociados por su ID.")]
+        [ProducesResponseType<AutorConLibrosDTO>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El id del autor")]int id)
         {
             var autor = await context.Autores.Include(x => x.Libros)
                 .ThenInclude(x => x.Libro)

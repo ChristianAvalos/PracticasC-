@@ -2,9 +2,11 @@ using BivliotecaAPI;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
+using BivliotecaAPI.Swagger;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Security.Cryptography.Xml;
 using System.Text;
 
@@ -22,7 +24,7 @@ builder.Services.AddCors(opciones =>
             politica.WithOrigins(origenesPermitidos)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .WithExposedHeaders("mi-cabecera");
+                    .WithExposedHeaders("cantidadTotalRegistros");
         });
 });
 builder.Services.AddAutoMapper(typeof(Program));
@@ -80,6 +82,31 @@ builder.Services.AddSwaggerGen(opciones =>
             Url = new Uri("https://opensource.org/license/mit/")
         }
     });
+
+    opciones.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Ingrese 'Bearer' seguido de un espacio y su token JWT",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+
+    });
+    opciones.OperationFilter<FiltroAutorizacion>();
+    //opciones.AddSecurityRequirement(new OpenApiSecurityRequirement
+    //{
+    //    {
+    //        new OpenApiSecurityScheme
+    //        {
+    //            Reference = new OpenApiReference
+    //            {
+    //                Type = ReferenceType.SecurityScheme,
+    //                Id = "Bearer"
+    //            }
+    //        },
+    //        new string[] {}
+    //    }
+    //});
 });
 
 var app = builder.Build();
