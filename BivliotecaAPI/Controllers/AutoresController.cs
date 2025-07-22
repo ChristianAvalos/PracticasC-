@@ -102,6 +102,10 @@ namespace BivliotecaAPI.Controllers
                     queryable = queryable.Where(x => !x.Libros.Any());
                 }
             }
+            if (!string.IsNullOrEmpty(autorFiltroDTO.TituloLibro))
+            {
+                queryable = queryable.Where(x => x.Libros.Any(y => y.Libro!.Titulo.Contains(autorFiltroDTO.TituloLibro)));
+            }
 
             var autores = await queryable.OrderBy(x => x.Nombres)
                 .Paginar(autorFiltroDTO.PaginacionDTO)
