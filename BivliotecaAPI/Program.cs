@@ -39,6 +39,7 @@ builder.Services.AddIdentityCore<Usuario>()
 builder.Services.AddScoped<UserManager<Usuario>>();
 builder.Services.AddScoped<SignInManager<Usuario>>();
 builder.Services.AddTransient<IServicioUsuarios, ServicioUsuarios>();
+builder.Services.AddTransient<IAlmacenadorArchivos,AlmacenadorArchivosLocal>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication().AddJwtBearer(opciones
     =>
@@ -113,6 +114,8 @@ var app = builder.Build();
 //area de middlewares
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseStaticFiles();
 
 
 app.UseCors();
