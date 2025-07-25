@@ -149,16 +149,17 @@ namespace BivliotecaAPI.Controllers
                 return NotFound();
             }
 
-            var comnentarioDB = await context.Comentarios.FirstOrDefaultAsync(x => x.Id == id);
-            if (comnentarioDB is null)
+            var comentarioDB = await context.Comentarios.FirstOrDefaultAsync(x => x.Id == id);
+            if (comentarioDB is null)
             {
                 return NotFound();
             }
-            if (comnentarioDB.UsuarioId != usuario.Id)
+            if (comentarioDB.UsuarioId != usuario.Id)
             {
                 return Forbid();
             }
-            context.Remove(comnentarioDB);
+            comentarioDB.EstaBorrado = true;
+            context.Update(comentarioDB);
 
             await context.SaveChangesAsync();
 

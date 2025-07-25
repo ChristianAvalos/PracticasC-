@@ -9,6 +9,12 @@ namespace BivliotecaAPI.Datos
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Comentario>()
+                .HasQueryFilter(x => !x.EstaBorrado);
+        }
 
         public DbSet<Autor> Autores { get; set; }
         public DbSet<Libro> Libros { get; set; }
