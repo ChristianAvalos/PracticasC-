@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.DTOs;
 using BivliotecaAPI.Entidades;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using System.Linq.Dynamic.Core;
 
 namespace BivliotecaAPI.Controllers
 {
@@ -21,33 +21,36 @@ namespace BivliotecaAPI.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly IAlmacenadorArchivos almacenadorArchivos;
+        private readonly ILogger<AutoresController> logger;
         private const string contenedor = "Autores";
 
-        public AutoresController(ApplicationDbContext context, IMapper mapper,IAlmacenadorArchivos almacenadorArchivos) 
+        public AutoresController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos,
+            ILogger<AutoresController> logger)
         {
             this.context = context;
             this.mapper = mapper;
             this.almacenadorArchivos = almacenadorArchivos;
+            this.logger = logger;
         }
         [HttpGet]
         [AllowAnonymous] //Permite el acceso sin autenticación
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
 
-            var queryable =  context.Autores.AsQueryable();
+            var queryable = context.Autores.AsQueryable();
             await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
             var autores = await queryable.OrderBy(x => x.Nombres).Paginar(paginacionDTO).ToListAsync();
             var autoresDTO = mapper.Map<IEnumerable<AutorDTO>>(autores);
             return autoresDTO;
         }
 
-        [HttpGet("{id:int}",Name ="ObtenerAutor")] //api/autores/id
+        [HttpGet("{id:int}", Name = "ObtenerAutor")] //api/autores/id
         [AllowAnonymous]
         [EndpointSummary("Obtiene autor por ID")]
         [EndpointDescription("Obtiene un autor específico junto con sus libros asociados por su ID.")]
         [ProducesResponseType<AutorConLibrosDTO>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El id del autor")]int id)
+        public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El id del autor")] int id)
         {
             var autor = await context.Autores.Include(x => x.Libros)
                 .ThenInclude(x => x.Libro)
@@ -60,7 +63,7 @@ namespace BivliotecaAPI.Controllers
             }
             var autorDTO = mapper.Map<AutorConLibrosDTO>(autor);
 
-            return autorDTO ;
+            return autorDTO;
         }
         [HttpGet("filtrar")]
         [AllowAnonymous]
@@ -107,10 +110,28 @@ namespace BivliotecaAPI.Controllers
                 queryable = queryable.Where(x => x.Libros.Any(y => y.Libro!.Titulo.Contains(autorFiltroDTO.TituloLibro)));
             }
 
-            var autores = await queryable.OrderBy(x => x.Nombres)
+            if (!string.IsNullOrEmpty(autorFiltroDTO.CampoOrdenar))
+            {
+                var tipoOrden = autorFiltroDTO.OrdenarAscendente ? "ascending" : "descending";
+                try
+                {
+                    queryable = queryable.OrderBy($"{autorFiltroDTO.CampoOrdenar} {tipoOrden}");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error al ordenar por el campo: {Campo}", autorFiltroDTO.CampoOrdenar);
+                    return BadRequest($"El campo de ordenamiento '{autorFiltroDTO.CampoOrdenar}' no es válido.");
+                }
+            }
+            else
+            {
+                queryable = queryable.OrderBy(x => x.Nombres);
+            }
+
+            var autores = await queryable
                 .Paginar(autorFiltroDTO.PaginacionDTO)
                 .ToListAsync();
-           
+
             if (autorFiltroDTO.IncluirLibros)
             {
                 var autoresDTO = mapper.Map<IEnumerable<AutorConLibrosDTO>>(autores);
@@ -123,7 +144,7 @@ namespace BivliotecaAPI.Controllers
                 return Ok(autoresDTO);
             }
 
-            
+
 
         }
 
@@ -136,7 +157,7 @@ namespace BivliotecaAPI.Controllers
             context.Add(autor);
             await context.SaveChangesAsync();
             var autorDTO = mapper.Map<AutorDTO>(autor);
-            return CreatedAtRoute("ObtenerAutor",new {id = autor.Id}, autorDTO);   
+            return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
         }
         [HttpPost("con-foto")]
         public async Task<ActionResult> PostConFoto([FromForm] AutorCreacionDTOConFoto autorCreacionDTOConFoto)
@@ -145,8 +166,8 @@ namespace BivliotecaAPI.Controllers
             var autor = mapper.Map<Autor>(autorCreacionDTOConFoto);
             if (autorCreacionDTOConFoto.Foto is not null)
             {
-               var url =  await almacenadorArchivos.Almacenar(contenedor, autorCreacionDTOConFoto.Foto);
-               autor.Foto = url;
+                var url = await almacenadorArchivos.Almacenar(contenedor, autorCreacionDTOConFoto.Foto);
+                autor.Foto = url;
             }
             else
             {
@@ -159,7 +180,7 @@ namespace BivliotecaAPI.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult> Put(int id,[FromForm] AutorCreacionDTOConFoto autorCreacionDTO)
+        public async Task<ActionResult> Put(int id, [FromForm] AutorCreacionDTOConFoto autorCreacionDTO)
         {
             var existeAutor = await context.Autores.AnyAsync(x => x.Id == id);
             if (!existeAutor)
@@ -169,7 +190,7 @@ namespace BivliotecaAPI.Controllers
 
 
             var autor = mapper.Map<Autor>(autorCreacionDTO);
-            autor.Id = id;  
+            autor.Id = id;
 
             if (autorCreacionDTO.Foto is not null)
             {
@@ -193,14 +214,14 @@ namespace BivliotecaAPI.Controllers
         }
 
         [HttpPatch("{id:int}")]
-        public async Task<ActionResult> Patch(int id,JsonPatchDocument<AutorPatchDTO> patchDoc)
+        public async Task<ActionResult> Patch(int id, JsonPatchDocument<AutorPatchDTO> patchDoc)
         {
             if (patchDoc is null)
             {
                 return BadRequest();
             }
 
-            var autorDB = await context.Autores.FirstOrDefaultAsync(x=> x.Id == id);
+            var autorDB = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
             if (autorDB is null)
             {
                 return BadRequest();
