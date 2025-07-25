@@ -1,14 +1,15 @@
 ﻿using AutoMapper;
 using BivliotecaAPI.Datos;
-using BivliotecaAPI.Entidades;
-using Microsoft.AspNetCore.Mvc;
 using BivliotecaAPI.DTOs;
+using BivliotecaAPI.Entidades;
+using BivliotecaAPI.Utilidades;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
-using BivliotecaAPI.Utilidades;
 
 namespace BivliotecaAPI.Controllers
 {
@@ -29,6 +30,7 @@ namespace BivliotecaAPI.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache]
         public async Task<IEnumerable<LibroDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             var queryable = context.Libros.AsQueryable();
@@ -42,6 +44,7 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet("{id:int}",Name = "ObtenerLibros")] //api/libros/id
         [AllowAnonymous]
+        [OutputCache]
         public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
         {
             var libro = await context.Libros

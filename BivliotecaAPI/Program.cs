@@ -13,6 +13,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //area de servicios 
+builder.Services.AddOutputCache(opciones =>
+{
+    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(20);
+});
+
+
 builder.Services.AddDataProtection();
 
 var origenesPermitidos = builder.Configuration.GetSection("origenesPermitidos").Get<string[]>()!;
@@ -112,6 +118,7 @@ builder.Services.AddSwaggerGen(opciones =>
 
 var app = builder.Build();
 //area de middlewares
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -119,6 +126,7 @@ app.UseStaticFiles();
 
 
 app.UseCors();
+app.UseOutputCache();
 
 app.MapControllers();   
 

@@ -6,6 +6,7 @@ using BivliotecaAPI.Servicios;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace BivliotecaAPI.Controllers
@@ -13,6 +14,7 @@ namespace BivliotecaAPI.Controllers
     [ApiController]
     [Route("api/libros/{libroId:int}/comentarios")]
     [Authorize]
+
 
     public class ComentartiosController: ControllerBase
     {
@@ -29,6 +31,7 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet]
         [AllowAnonymous]
+        [OutputCache]
         public async Task<ActionResult<List<ComentarioDTO>>> get(int libroId)
         {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
@@ -49,6 +52,7 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet("{id}", Name = "ObtenerComentario")]
         [AllowAnonymous]
+        [OutputCache]
         public async Task<ActionResult<ComentarioDTO>> get(Guid id)
         {
             var comentario = await context.Comentarios
