@@ -20,17 +20,21 @@ namespace BivliotecaAPI.Controllers
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly IOutputCacheStore outputCacheStore;
+        private const string cache = "libros-obteber";
 
-        public LibrosController(ApplicationDbContext context, IMapper mapper)
+        public LibrosController(ApplicationDbContext context, IMapper mapper,
+            IOutputCacheStore outputCacheStore)
         {
             this.context = context;
             this.mapper = mapper;
+            this.outputCacheStore = outputCacheStore;
         }
        
 
         [HttpGet]
         [AllowAnonymous]
-        [OutputCache]
+        [OutputCache(Tags = [cache])]
         public async Task<IEnumerable<LibroDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
             var queryable = context.Libros.AsQueryable();
@@ -44,7 +48,7 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet("{id:int}",Name = "ObtenerLibros")] //api/libros/id
         [AllowAnonymous]
-        [OutputCache]
+        [OutputCache(Tags = [cache])]
         public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
         {
             var libro = await context.Libros
@@ -92,6 +96,7 @@ namespace BivliotecaAPI.Controllers
 
             context.Add(libro);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache,default);
             var libroDTO = mapper.Map<LibroDTO>(libro);
             return CreatedAtRoute("ObtenerLibros", new { id = libro.Id }, libroDTO);
         }
@@ -144,6 +149,7 @@ namespace BivliotecaAPI.Controllers
             AsignarOrdenAutores(libroDB);
 
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
             return NoContent();
         }
 
@@ -155,7 +161,9 @@ namespace BivliotecaAPI.Controllers
             {
                 return NotFound();
             }
+            await outputCacheStore.EvictByTagAsync(cache, default);
             return Ok();
+
         }
 
     }

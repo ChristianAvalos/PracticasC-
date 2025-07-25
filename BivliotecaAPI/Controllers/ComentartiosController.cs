@@ -21,17 +21,20 @@ namespace BivliotecaAPI.Controllers
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
         private readonly IServicioUsuarios serviciosUsuarios;
+        private readonly IOutputCacheStore outputCacheStore;
+        private const string cache = "obtener-comentarios";
 
         public ComentartiosController(ApplicationDbContext context, IMapper mapper,
-            IServicioUsuarios serviciosUsuarios) {
+            IServicioUsuarios serviciosUsuarios,IOutputCacheStore outputCacheStore) {
 
             this.context = context;
             this.mapper = mapper;
             this.serviciosUsuarios = serviciosUsuarios;
+            this.outputCacheStore = outputCacheStore;
         }
         [HttpGet]
         [AllowAnonymous]
-        [OutputCache]
+        [OutputCache(Tags = [cache])]
         public async Task<ActionResult<List<ComentarioDTO>>> get(int libroId)
         {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
@@ -52,7 +55,7 @@ namespace BivliotecaAPI.Controllers
         }
         [HttpGet("{id}", Name = "ObtenerComentario")]
         [AllowAnonymous]
-        [OutputCache]
+        [OutputCache(Tags = [cache])]
         public async Task<ActionResult<ComentarioDTO>> get(Guid id)
         {
             var comentario = await context.Comentarios
@@ -86,6 +89,7 @@ namespace BivliotecaAPI.Controllers
             comentario.UsuarioId = usuario.Id;
             context.Add(comentario);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache,default);
 
             var comentarioDTO = mapper.Map<ComentarioDTO>(comentario);
             return CreatedAtRoute("ObtenerComentario", new {id = comentario.Id,libroId}, comentarioDTO);
@@ -134,6 +138,7 @@ namespace BivliotecaAPI.Controllers
             mapper.Map(comentarioPatchDTO, comnentarioDB);
 
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
 
             return NoContent();
 
@@ -166,6 +171,7 @@ namespace BivliotecaAPI.Controllers
             context.Update(comentarioDB);
 
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync(cache, default);
 
 
             return NoContent();
