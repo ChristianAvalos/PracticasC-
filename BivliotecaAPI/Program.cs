@@ -3,6 +3,7 @@ using BivliotecaAPI.Datos;
 using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
 using BivliotecaAPI.Swagger;
+using BivliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -13,14 +14,14 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //area de servicios 
-//builder.Services.AddOutputCache(opciones =>
-//{
-//    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(20);
-//});
-builder.Services.AddStackExchangeRedisOutputCache(opciones =>
+builder.Services.AddOutputCache(opciones =>
 {
-    opciones.Configuration = builder.Configuration.GetConnectionString("redis");
+    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(20);
 });
+//builder.Services.AddStackExchangeRedisOutputCache(opciones =>
+//{
+//    opciones.Configuration = builder.Configuration.GetConnectionString("redis");
+//});
 
 
 builder.Services.AddDataProtection();
@@ -38,7 +39,9 @@ builder.Services.AddCors(opciones =>
         });
 });
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers(opciones => 
+    opciones.Filters.Add<FiltroTiempoEjecucion>()
+).AddNewtonsoftJson();
 
 builder.Services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseSqlServer("name=DefaultConnection"));
 
@@ -50,6 +53,7 @@ builder.Services.AddScoped<UserManager<Usuario>>();
 builder.Services.AddScoped<SignInManager<Usuario>>();
 builder.Services.AddTransient<IServicioUsuarios, ServicioUsuarios>();
 builder.Services.AddTransient<IAlmacenadorArchivos,AlmacenadorArchivosLocal>();
+builder.Services.AddScoped<MiFiltroDeAccion>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication().AddJwtBearer(opciones
     =>

@@ -17,6 +17,7 @@ namespace BivliotecaAPI.Controllers
     [ApiController]
     [Route("api/autores")]
     [Authorize(Policy = "EsAdmin")]
+    [FiltroAgregarCabeceras("controlador","autores")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -39,6 +40,8 @@ namespace BivliotecaAPI.Controllers
         [HttpGet]
         [AllowAnonymous] //Permite el acceso sin autenticación
         [OutputCache(Tags = [cache])]
+        [ServiceFilter<MiFiltroDeAccion>()]
+        [FiltroAgregarCabeceras("accion", "obtener-autores")]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
 
