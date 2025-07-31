@@ -13,9 +13,13 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 //area de servicios 
-builder.Services.AddOutputCache(opciones =>
+//builder.Services.AddOutputCache(opciones =>
+//{
+//    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(20);
+//});
+builder.Services.AddStackExchangeRedisOutputCache(opciones =>
 {
-    opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(20);
+    opciones.Configuration = builder.Configuration.GetConnectionString("redis");
 });
 
 
