@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
+using System.Diagnostics;
 
 namespace BivliotecaAPI.Utilidades
 {
@@ -13,15 +14,14 @@ namespace BivliotecaAPI.Utilidades
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             // Antes de la ejecucion de la accion
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            logger.LogInformation("Inicio de la ejecucion de la accion: {ActionName}", context.ActionDescriptor.DisplayName);
+            var stopwatch = Stopwatch.StartNew();
+            logger.LogInformation($"Inicio de la accion: { context.ActionDescriptor.DisplayName}");
 
             await next();
 
             // Despues de la ejecucion de la accion
             stopwatch.Stop();
-            logger.LogInformation("Fin de la ejecucion de la accion: {ActionName} - Tiempo transcurrido: {ElapsedMilliseconds} ms",
-                context.ActionDescriptor.DisplayName, stopwatch.ElapsedMilliseconds);
+            logger.LogInformation($"Fin de la ejecucion de la accion: {context.ActionDescriptor.DisplayName} - Tiempo transcurrido: {stopwatch.ElapsedMilliseconds} ms");
         }
     }
 }
