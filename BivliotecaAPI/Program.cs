@@ -1,3 +1,4 @@
+
 using BivliotecaAPI;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.Entidades;
@@ -54,6 +55,7 @@ builder.Services.AddScoped<SignInManager<Usuario>>();
 builder.Services.AddTransient<IServicioUsuarios, ServicioUsuarios>();
 builder.Services.AddTransient<IAlmacenadorArchivos,AlmacenadorArchivosLocal>();
 builder.Services.AddScoped<MiFiltroDeAccion>();
+builder.Services.AddScoped<FiltroValidacionLibro>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication().AddJwtBearer(opciones
     =>
