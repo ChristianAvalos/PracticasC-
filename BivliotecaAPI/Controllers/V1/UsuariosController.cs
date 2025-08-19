@@ -12,10 +12,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BivliotecaAPI.Controllers
+namespace BivliotecaAPI.Controllers.V1
 {
     [ApiController]
-    [Route("api/usuarios")]
+    [Route("api/v1/usuarios")]
     
     public class UsuariosController: ControllerBase
     {

@@ -12,10 +12,10 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 
-namespace BivliotecaAPI.Controllers
+namespace BivliotecaAPI.Controllers.V1
 {
     [ApiController]
-    [Route("api/autores")]
+    [Route("api/v1/autores")]
     [Authorize(Policy = "EsAdmin")]
     [FiltroAgregarCabeceras("controlador","autores")]
     public class AutoresController : ControllerBase
@@ -51,7 +51,7 @@ namespace BivliotecaAPI.Controllers
             return autoresDTO;
         }
 
-        [HttpGet("{id:int}", Name = "ObtenerAutor")] //api/autores/id
+        [HttpGet("{id:int}", Name = "ObtenerAutorv1")] //api/autores/id
         [AllowAnonymous]
         [EndpointSummary("Obtiene autor por ID")]
         [EndpointDescription("Obtiene un autor específico junto con sus libros asociados por su ID.")]
@@ -166,7 +166,7 @@ namespace BivliotecaAPI.Controllers
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache, default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
-            return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
+            return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
         [HttpPost("con-foto")]
         public async Task<ActionResult> PostConFoto([FromForm] AutorCreacionDTOConFoto autorCreacionDTOConFoto)
@@ -186,7 +186,7 @@ namespace BivliotecaAPI.Controllers
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache,default);
             var autorDTO = mapper.Map<AutorDTO>(autor);
-            return CreatedAtRoute("ObtenerAutor", new { id = autor.Id }, autorDTO);
+            return CreatedAtRoute("ObtenerAutorv1", new { id = autor.Id }, autorDTO);
         }
 
         [HttpPut("{id:int}")]

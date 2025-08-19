@@ -5,10 +5,10 @@ using BivliotecaAPI.Entidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-namespace BivliotecaAPI.Controllers
+namespace BivliotecaAPI.Controllers.V2
 {
     [ApiController]
-    [Route("api/autores-coleccion")]
+    [Route("api/v2/autores-coleccion")]
     [Authorize(Policy = "EsAdmin")]
     public class AutoresColeccionController: ControllerBase
     {
@@ -20,7 +20,7 @@ namespace BivliotecaAPI.Controllers
             this.context = context;
             this.mapper = mapper;
         }
-        [HttpGet("{ids}", Name = "ObtenerAutoresPorIds")]
+        [HttpGet("{ids}", Name = "ObtenerAutoresPorIdsv2")]
         public async Task<ActionResult<List<AutorConLibrosDTO>>> Get([FromRoute] string ids)
         {
             var idsColeccion = new List<int>();
@@ -58,9 +58,9 @@ namespace BivliotecaAPI.Controllers
             var autoresDTO = mapper.Map<IEnumerable<AutorDTO>>(autores);
             var ids = autores.Select(x => x.Id);
             var idsString = string.Join(",", ids);
-            return CreatedAtRoute("ObtenerAutoresPorIds", new { ids = idsString }, autoresDTO);
+            return CreatedAtRoute("ObtenerAutoresPorIdsv2", new { ids = idsString }, autoresDTO);
         }
-        [HttpGet(Name = "ObtenerAutoresColeccion")]
+        [HttpGet(Name = "ObtenerAutoresColeccionv2")]
         public async Task<ActionResult<IEnumerable<AutorDTO>>> Get()
         {
             var autores = await context.Autores.ToListAsync();

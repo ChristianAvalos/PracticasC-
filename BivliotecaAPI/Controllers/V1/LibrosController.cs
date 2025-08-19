@@ -11,10 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection.Metadata.Ecma335;
 
-namespace BivliotecaAPI.Controllers
+namespace BivliotecaAPI.Controllers.V1
 {
     [ApiController]
-    [Route("api/libros")]
+    [Route("api/v1/libros")]
     [Authorize(Policy = "EsAdmin")]
     public class LibrosController:ControllerBase
     {
@@ -46,7 +46,7 @@ namespace BivliotecaAPI.Controllers
             var librosDTO = mapper.Map<IEnumerable<LibroDTO>>(libros);
             return librosDTO;
         }
-        [HttpGet("{id:int}",Name = "ObtenerLibros")] //api/libros/id
+        [HttpGet("{id:int}",Name = "ObtenerLibrosv1")] //api/libros/id
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
@@ -79,7 +79,7 @@ namespace BivliotecaAPI.Controllers
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache,default);
             var libroDTO = mapper.Map<LibroDTO>(libro);
-            return CreatedAtRoute("ObtenerLibros", new { id = libro.Id }, libroDTO);
+            return CreatedAtRoute("ObtenerLibrosv1", new { id = libro.Id }, libroDTO);
         }
         private void AsignarOrdenAutores(Libro libro)
         {
