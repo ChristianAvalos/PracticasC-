@@ -44,7 +44,6 @@ namespace BivliotecaAPI.Controllers
         [FiltroAgregarCabeceras("accion", "obtener-autores")]
         public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
-
             var queryable = context.Autores.AsQueryable();
             await HttpContext.InsertarParametrosPaginacionEnCabecera(queryable);
             var autores = await queryable.OrderBy(x => x.Nombres).Paginar(paginacionDTO).ToListAsync();

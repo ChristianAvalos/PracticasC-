@@ -5,6 +5,7 @@ using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
 using BivliotecaAPI.Swagger;
 using BivliotecaAPI.Utilidades;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -128,6 +129,30 @@ builder.Services.AddSwaggerGen(opciones =>
 
 var app = builder.Build();
 //area de middlewares
+app.UseExceptionHandler(exceptionHanlderApp =>
+{
+    exceptionHanlderApp.Run(async context =>
+    {
+        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+        var exception = exceptionHandlerFeature?.Error;
+        var error = new Error
+        {
+            Id = Guid.NewGuid(),
+            MensajeDeError = exception?.Message ?? "Error desconocido",
+            StackTrace = exception?.StackTrace,
+            Fecha = DateTime.UtcNow
+        };
+        var dbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
+        dbContext.Errores.Add(error);
+        await dbContext.SaveChangesAsync();
+        await Results.InternalServerError(new 
+        {
+            tipo = "error",
+            mensaje = "Ocurrió un error interno. Por favor, inténtelo de nuevo más tarde.",
+            estatus = 500
+        }).ExecuteAsync(context);
+    });
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();
