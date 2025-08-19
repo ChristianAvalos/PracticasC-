@@ -3,6 +3,7 @@ using BivliotecaAPI;
 using BivliotecaAPI.Datos;
 using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
+using BivliotecaAPI.Servicios.V1;
 using BivliotecaAPI.Swagger;
 using BivliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Diagnostics;
@@ -41,9 +42,11 @@ builder.Services.AddCors(opciones =>
         });
 });
 builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddControllers(opciones => 
-    opciones.Filters.Add<FiltroTiempoEjecucion>()
-).AddNewtonsoftJson();
+builder.Services.AddControllers(opciones =>
+{
+    opciones.Filters.Add<FiltroTiempoEjecucion>();
+    opciones.Conventions.Add(new ConvencionAgrupaPorVersion());
+}).AddNewtonsoftJson();
 
 builder.Services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseSqlServer("name=DefaultConnection"));
 
@@ -57,6 +60,7 @@ builder.Services.AddTransient<IServicioUsuarios, ServicioUsuarios>();
 builder.Services.AddTransient<IAlmacenadorArchivos,AlmacenadorArchivosLocal>();
 builder.Services.AddScoped<MiFiltroDeAccion>();
 builder.Services.AddScoped<FiltroValidacionLibro>();
+builder.Services.AddScoped<IServicioAutores, ServicioAutores>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication().AddJwtBearer(opciones
     =>
@@ -87,6 +91,24 @@ builder.Services.AddSwaggerGen(opciones =>
     {
         Title = "Biblioteca API",
         Version = "v1",
+        Description = "API para gestionar una biblioteca",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Email = "christiand.avalos.e@gmail.com",
+            Name = "Christian Avalos",
+            Url = new Uri("https://christianavalos.com")
+        },
+        License = new Microsoft.OpenApi.Models.OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/license/mit/")
+        }
+    });
+
+    opciones.SwaggerDoc("v2", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Biblioteca API",
+        Version = "v2",
         Description = "API para gestionar una biblioteca",
         Contact = new Microsoft.OpenApi.Models.OpenApiContact
         {
@@ -155,7 +177,12 @@ app.UseExceptionHandler(exceptionHanlderApp =>
 });
 
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(opciones =>
+{
+    opciones.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblioteca API v1");
+    opciones.SwaggerEndpoint("/swagger/v2/swagger.json", "Biblioteca API v2");
+}
+);
 
 app.UseStaticFiles();
 
