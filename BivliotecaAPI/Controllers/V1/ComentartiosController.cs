@@ -32,7 +32,7 @@ namespace BivliotecaAPI.Controllers.V1
             this.serviciosUsuarios = serviciosUsuarios;
             this.outputCacheStore = outputCacheStore;
         }
-        [HttpGet]
+        [HttpGet(Name ="ObetnerComentariosV1")]
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         public async Task<ActionResult<List<ComentarioDTO>>> get(int libroId)
@@ -69,7 +69,7 @@ namespace BivliotecaAPI.Controllers.V1
             return mapper.Map<ComentarioDTO>(comentario);
 
         }
-        [HttpPost]
+        [HttpPost(Name ="CrearComentariosV1")]
         public async Task<ActionResult> Post(int libroId,ComentarioCreacionDTO comentarioCreacionDTO)
         {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);
@@ -95,7 +95,7 @@ namespace BivliotecaAPI.Controllers.V1
             return CreatedAtRoute("ObtenerComentariov1", new {id = comentario.Id,libroId}, comentarioDTO);
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}",Name ="ActualizarComentarioV1")]
         public async Task<ActionResult> Patch(Guid id,int libroId, JsonPatchDocument<ComentarioPatchDTO> patchDoc)
         {
             if (patchDoc is null)
@@ -143,7 +143,7 @@ namespace BivliotecaAPI.Controllers.V1
             return NoContent();
 
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}",Name ="BorrarComentarioV1")]
         public async Task<ActionResult> Delete(Guid id,int libroId)
         {
             var existeLibro = await context.Libros.AnyAsync(x => x.Id == libroId);

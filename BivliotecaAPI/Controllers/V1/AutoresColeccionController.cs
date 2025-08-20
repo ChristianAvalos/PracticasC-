@@ -49,7 +49,7 @@ namespace BivliotecaAPI.Controllers.V1
             return Ok(autoresDTO);
         } 
 
-        [HttpPost]
+        [HttpPost(Name ="CrearAutoresV1")]
         public async Task<ActionResult> Post(IEnumerable<AutorCreacionDTO> autoresCreacionDTO)
         {
             var autores = mapper.Map<IEnumerable<Autor>>(autoresCreacionDTO);

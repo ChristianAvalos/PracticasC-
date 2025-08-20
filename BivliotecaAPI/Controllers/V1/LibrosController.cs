@@ -32,7 +32,7 @@ namespace BivliotecaAPI.Controllers.V1
         }
        
 
-        [HttpGet]
+        [HttpGet(Name ="ObtenerLibrosV1")]
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         public async Task<IEnumerable<LibroDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
@@ -46,7 +46,7 @@ namespace BivliotecaAPI.Controllers.V1
             var librosDTO = mapper.Map<IEnumerable<LibroDTO>>(libros);
             return librosDTO;
         }
-        [HttpGet("{id:int}",Name = "ObtenerLibrosv1")] //api/libros/id
+        [HttpGet("{id:int}",Name = "ObtenerLibroV1")] //api/libros/id
         [AllowAnonymous]
         [OutputCache(Tags = [cache])]
         public async Task<ActionResult<LibroConAutoresDTO>> Get(int id)
@@ -66,7 +66,7 @@ namespace BivliotecaAPI.Controllers.V1
             return libroDTO;
         }
 
-        [HttpPost]
+        [HttpPost(Name ="CrearLibroV1")]
         [ServiceFilter<FiltroValidacionLibro>()]
 
         public async Task<ActionResult> Post(LibroCreacionDTO libroCreacionDTO)
@@ -79,7 +79,7 @@ namespace BivliotecaAPI.Controllers.V1
             await context.SaveChangesAsync();
             await outputCacheStore.EvictByTagAsync(cache,default);
             var libroDTO = mapper.Map<LibroDTO>(libro);
-            return CreatedAtRoute("ObtenerLibrosv1", new { id = libro.Id }, libroDTO);
+            return CreatedAtRoute("ObtenerLibroV1", new { id = libro.Id }, libroDTO);
         }
         private void AsignarOrdenAutores(Libro libro)
         {
@@ -94,7 +94,7 @@ namespace BivliotecaAPI.Controllers.V1
         }
 
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int}",Name ="ActualizarLibroV1")]
         [ServiceFilter<FiltroValidacionLibro>()]
         public async Task<ActionResult> Put(int id, LibroCreacionDTO libroCreacionDTO)
         {
@@ -117,7 +117,7 @@ namespace BivliotecaAPI.Controllers.V1
             return NoContent();
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:int}",Name = "BorrarLibroV1")]
         public async Task<ActionResult> Delete(int id)
         {
             var registrosBorrados = await context.Libros.Where(x => x.Id == id).ExecuteDeleteAsync();

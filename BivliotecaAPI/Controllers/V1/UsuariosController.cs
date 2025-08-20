@@ -38,7 +38,7 @@ namespace BivliotecaAPI.Controllers.V1
             this.context = context;
             this.mapper = mapper;
         }
-        [HttpGet]
+        [HttpGet(Name = "ObtenerUsuariosV1")]
         [Authorize(Policy ="esAdmin")]
         public async Task<IEnumerable<UsuarioDTO>> Get()
         {
@@ -47,7 +47,7 @@ namespace BivliotecaAPI.Controllers.V1
             return usuariosDTO;
         }
 
-        [HttpPost("registro")]
+        [HttpPost("registro",Name ="RegistarUsuarioV1")]
         
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Registrar(
             CredencialesUsuarioDTO credencialesUsuarioDTO)
@@ -72,7 +72,7 @@ namespace BivliotecaAPI.Controllers.V1
                 return ValidationProblem();
             }
         }
-        [HttpPost("login")]
+        [HttpPost("login",Name ="LoginUsuarioV1")]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> Login(
             CredencialesUsuarioDTO credencialesUsuarioDTO)
         {
@@ -98,7 +98,7 @@ namespace BivliotecaAPI.Controllers.V1
             ModelState.AddModelError(string.Empty, "Login incorrectos");
             return ValidationProblem();
         }
-        [HttpPut]
+        [HttpPut("actualizarUsuario",Name ="ActualizarUsuarioV1")]
         [Authorize]
         public async Task<ActionResult> Put(ActualizarUsuarioDTO actualizarUsuarioDTO)
         {
@@ -119,7 +119,7 @@ namespace BivliotecaAPI.Controllers.V1
             }
         }
 
-        [HttpGet("renovar-token")]
+        [HttpGet("renovar-token",Name ="RenovarTokenUsuarioV1")]
         [Authorize]
         public async Task<ActionResult<RespuestaAutenticacionDTO>> RenovarToken()
         {
@@ -135,7 +135,7 @@ namespace BivliotecaAPI.Controllers.V1
             };
             return Ok(await ConstruirToken(credencialesUsuarioDTO));
         }
-        [HttpPost("hacer-admin")]
+        [HttpPost("hacer-admin",Name ="HacerAdminUsuarioV1")]
         [Authorize(Policy = "EsAdmin")]
         public async Task<ActionResult> HacerAdmin(EditarClaimDTO editarClaimDTO)
         {
@@ -155,7 +155,7 @@ namespace BivliotecaAPI.Controllers.V1
             }
         }
 
-        [HttpPost("remover-admin")]
+        [HttpPost("remover-admin",Name = "BorrarAdminUsuarioV1")]
         [Authorize(Policy = "EsAdmin")]
         public async Task<ActionResult> RemoverAdmin(EditarClaimDTO editarClaimDTO)
         {
