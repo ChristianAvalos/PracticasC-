@@ -45,9 +45,22 @@ namespace BivliotecaAPI.Controllers.V1
         //[OutputCache(Tags = [cache])]
         [ServiceFilter<MiFiltroDeAccion>()]
         [FiltroAgregarCabeceras("accion", "obtener-autores")]
-        public async Task<IEnumerable<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
+        public async Task<ColeccionDeRecursosDTO<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
         {
-            return await servicioAutoresV1.Get(paginacionDTO);
+            var dtos = await servicioAutoresV1.Get(paginacionDTO);
+            //return await servicioAutoresV1.Get(paginacionDTO);
+            foreach (var dto in dtos)
+            {
+                GenerarEnlaces(dto);
+            }
+            var resultado = new ColeccionDeRecursosDTO<AutorDTO> 
+            {
+                Valores = dtos
+            };
+            resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ObtenerAutoresV1", new {  })!, Descripcion: "self", Metodo: "GET"));
+            resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorV1", new { })!, Descripcion: "autor-crear", Metodo: "POST"));
+            resultado. Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorConFotoV1", new { })!, Descripcion: "autor-crear-con-foto", Metodo: "POST"));
+            return resultado;
         }
 
         [HttpGet("{id:int}", Name = "ObtenerAutorv1")] //api/autores/id
