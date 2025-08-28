@@ -6,10 +6,12 @@ using BivliotecaAPI.Servicios;
 using BivliotecaAPI.Servicios.V1;
 using BivliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel;
 using System.Linq.Dynamic.Core;
 
@@ -18,7 +20,7 @@ namespace BivliotecaAPI.Controllers.V1
     [ApiController]
     [Route("api/v1/autores")]
     [Authorize(Policy = "EsAdmin")]
-    [FiltroAgregarCabeceras("controlador","autores")]
+    [FiltroAgregarCabeceras("controlador", "autores")]
     public class AutoresController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -31,7 +33,7 @@ namespace BivliotecaAPI.Controllers.V1
         private const string cache = "autores-obtener";
 
         public AutoresController(ApplicationDbContext context, IMapper mapper, IAlmacenadorArchivos almacenadorArchivos,
-            ILogger<AutoresController> logger,IOutputCacheStore outputCacheStore, IServicioAutores servicioAutoresV1)
+            ILogger<AutoresController> logger, IOutputCacheStore outputCacheStore, IServicioAutores servicioAutoresV1)
         {
             this.context = context;
             this.mapper = mapper;
@@ -45,22 +47,32 @@ namespace BivliotecaAPI.Controllers.V1
         //[OutputCache(Tags = [cache])]
         [ServiceFilter<MiFiltroDeAccion>()]
         [FiltroAgregarCabeceras("accion", "obtener-autores")]
-        public async Task<ColeccionDeRecursosDTO<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO)
+        public async Task<ActionResult<AutorDTO>> Get([FromQuery] PaginacionDTO paginacionDTO,
+                     [FromQuery] bool incluirHATEOAS = false)
         {
             var dtos = await servicioAutoresV1.Get(paginacionDTO);
             //return await servicioAutoresV1.Get(paginacionDTO);
-            foreach (var dto in dtos)
+            if (incluirHATEOAS)
             {
-                GenerarEnlaces(dto);
+                
+
+                foreach (var dto in dtos)
+                {
+                    GenerarEnlaces(dto);
+                }
+                var resultado = new ColeccionDeRecursosDTO<AutorDTO>
+                {
+                    Valores = dtos
+                };
+                resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ObtenerAutoresV1", new {  })!, Descripcion: "self", Metodo: "GET"));
+                resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorV1", new { })!, Descripcion: "autor-crear", Metodo: "POST"));
+                resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorConFotoV1", new { })!, Descripcion: "autor-crear-con-foto", Metodo: "POST"));
+
+                return Ok(value:resultado);
             }
-            var resultado = new ColeccionDeRecursosDTO<AutorDTO> 
-            {
-                Valores = dtos
-            };
-            resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ObtenerAutoresV1", new {  })!, Descripcion: "self", Metodo: "GET"));
-            resultado.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorV1", new { })!, Descripcion: "autor-crear", Metodo: "POST"));
-            resultado. Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("CrearAutorConFotoV1", new { })!, Descripcion: "autor-crear-con-foto", Metodo: "POST"));
-            return resultado;
+        
+            
+            return Ok(dtos);
         }
 
         [HttpGet("{id:int}", Name = "ObtenerAutorv1")] //api/autores/id
