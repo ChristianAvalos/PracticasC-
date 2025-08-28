@@ -6,6 +6,7 @@ using BivliotecaAPI.Servicios;
 using BivliotecaAPI.Servicios.V1;
 using BivliotecaAPI.Swagger;
 using BivliotecaAPI.Utilidades;
+using BivliotecaAPI.Utilidades.V1;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,8 @@ builder.Services.AddTransient<IAlmacenadorArchivos,AlmacenadorArchivosLocal>();
 builder.Services.AddScoped<MiFiltroDeAccion>();
 builder.Services.AddScoped<FiltroValidacionLibro>();
 builder.Services.AddScoped<IServicioAutores, ServicioAutores>();
+builder.Services.AddScoped<IGeneradorEnlaces, GeneradorEnlaces>();
+builder.Services.AddScoped<HATEOASAutorAttribute>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication().AddJwtBearer(opciones
     =>

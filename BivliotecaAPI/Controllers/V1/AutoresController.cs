@@ -5,6 +5,7 @@ using BivliotecaAPI.Entidades;
 using BivliotecaAPI.Servicios;
 using BivliotecaAPI.Servicios.V1;
 using BivliotecaAPI.Utilidades;
+using BivliotecaAPI.Utilidades.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
@@ -74,6 +75,13 @@ namespace BivliotecaAPI.Controllers.V1
             
             return Ok(dtos);
         }
+        private void GenerarEnlaces(AutorDTO autorDTO)
+        {
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ObtenerAutorv1", new { id = autorDTO.Id })!, Descripcion: "self", Metodo: "GET"));
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ActualizarAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-actualizar", Metodo: "PUT"));
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("PatchAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-actualizar-parcial", Metodo: "PATCH"));
+            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("BorrarAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-borrar", Metodo: "DELETE"));
+        }
 
         [HttpGet("{id:int}", Name = "ObtenerAutorv1")] //api/autores/id
         [AllowAnonymous]
@@ -81,6 +89,7 @@ namespace BivliotecaAPI.Controllers.V1
         [EndpointDescription("Obtiene un autor específico junto con sus libros asociados por su ID.")]
         [ProducesResponseType<AutorConLibrosDTO>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ServiceFilter<HATEOASAutorAttribute>()]
         //[OutputCache(Tags = [cache])]
         public async Task<ActionResult<AutorConLibrosDTO>> Get([Description("El id del autor")] int id)
         {
@@ -95,18 +104,12 @@ namespace BivliotecaAPI.Controllers.V1
             }
             var autorDTO = mapper.Map<AutorConLibrosDTO>(autor);
 
-            GenerarEnlaces(autorDTO);
+
 
             return autorDTO;
         }
 
-        private void GenerarEnlaces(AutorDTO autorDTO)
-        {
-            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ObtenerAutorv1", new { id = autorDTO.Id })!, Descripcion: "self", Metodo: "GET"));
-            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("ActualizarAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-actualizar", Metodo: "PUT"));
-            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("PatchAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-actualizar-parcial", Metodo: "PATCH"));
-            autorDTO.Enlaces.Add(new DatosHATEOASDTO(Enlace: Url.Link("BorrarAutorV1", new { id = autorDTO.Id })!, Descripcion: "autor-borrar", Metodo: "DELETE"));
-        }
+        
 
         [HttpGet("filtrar", Name ="FiltrarAutoresV1")]
         [AllowAnonymous]
